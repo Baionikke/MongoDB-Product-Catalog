@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "NGD_Project_App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "NGD_Project_App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
