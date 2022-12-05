@@ -11,4 +11,4 @@ in order to build up a MongoDB server with three nodes (replica set) available. 
 
 2. `db.cities.insertMany([ {"name": "Tokyo", "country": "Japan", "continent": "Asia", "population": 37.400 }, {"name": "Delhi", "country": "India", "continent": "Asia", "population": 28.514 }, {"name": "Seoul", "country": "South Korea", "continent": "Asia", "population": 25.674 } ])`
 
-And nowm enjoy the app! :)
+And now, enjoy the app! :)
