@@ -24,11 +24,15 @@
         <Border Grid.Column ="1" Background="#1f3d7a"/>
         <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#152951"/>
 
-        <TextBlock x:ConnectionId='2' Grid.Row="1" Grid.Column="0" x:Name="connectionBlock" Visibility="Collapsed" HorizontalAlignment="Left"></TextBlock>
-        <Button x:ConnectionId='3' Grid.Row="1" Grid.Column="1" x:Name="ResetButton"                           HorizontalAlignment="Right">Reset</Button>
+        <TextBlock x:ConnectionId='2' Grid.Row="1" Grid.Column="0" x:Name="connectionBlock" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+        <Button x:ConnectionId='3' Grid.Row="1" Grid.Column="1" x:Name="ResetButton"                           HorizontalAlignment="Center" VerticalAlignment="Center">Reset</Button>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
 
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:ConnectionId='13' x:Name="InitButton"                         >InitDB</Button>
+            </StackPanel>
+            
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button x:ConnectionId='11' x:Name="InsertButton"                           >Insert</Button>
                 <TextBox x:ConnectionId='12' x:Name="InsertTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>

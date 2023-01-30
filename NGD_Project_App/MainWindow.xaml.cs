@@ -26,29 +26,36 @@ using Windows.Media.Protection.PlayReady;
 using System.Xml.Linq;
 using Microsoft.UI.Xaml.Documents;
 using Windows.Media.Effects;
+using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
+using MongoDB.Driver.Core.Configuration;
 
 namespace NGD_Project_App
 {
     public sealed partial class MainWindow : Window
     {
+        public string connectionString = "mongodb://MSI-GS75Stealth:27017,MSI-GS75Stealth:27018,MSI-GS75Stealth:27019?replicaSet=rs";
+        //public string connectionString = "mongodb://localhost:27017";
+
+
         public MainWindow()
         {
             this.InitializeComponent();
             Title = "Product Catalog";
-            if ( StartConnection() )
-            {
-                connectionBlock.Visibility = Visibility.Visible;
-                connectionBlock.Text = "Connected";
-            }
+            connectionBlock.Visibility = Visibility.Visible;
+            connectionBlock.Text = "Waiting...";
+            StartConnection();
         }
 
         private bool StartConnection()
         {
             try
             {
-                var client = new MongoClient("mongodb://BAIONIKKES-PC:27017,BAIONIKKES-PC:27018,BAIONIKKES-PC:27019?replicaSet=rs");
+                var client = new MongoClient(connectionString);
             }
-            catch (Exception ex) { connectionBlock.Text = ex.Message.ToString();  return false; }
+            catch (Exception ex) { 
+                connectionBlock.Text = ex.Message.ToString();  
+                return false; }
             return true;
         }
 
@@ -56,10 +63,52 @@ namespace NGD_Project_App
         {
             if (StartConnection() )
             {
-                var client = new MongoClient("mongodb://BAIONIKKES-PC:27017,BAIONIKKES-PC:27018,BAIONIKKES-PC:27019?replicaSet=rs");
+                var client = new MongoClient(connectionString);
                 return client;
             }
             else { return null; }
+        }
+
+        private void InitDB()
+        {
+            var session = GetConnectionClient().StartSession();
+
+            var cities = new BsonDocument[]
+            {
+                new BsonDocument()
+                {
+                    { "name", "Tokyo" },
+                    { "country", "Japan" },
+                    { "continent", "Asia" },
+                    { "population", 37400 },
+                },
+                new BsonDocument()
+                {
+                    { "name", "Delhi" },
+                    { "country", "India" },
+                    { "continent", "Asia" },
+                    { "population", 28.514 }
+                },
+                new BsonDocument()
+                {
+                    {"name", "Seoul" },
+                    {"country", "South Korea" },
+                    { "continent", "Asia" },
+                    { "population", 25.674 }
+                }
+            };
+
+            session.StartTransaction();
+            var db = new MongoClient(connectionString).GetDatabase("NGD_Project");
+            db.DropCollection("cities");
+            IMongoCollection<BsonDocument> collection = db.GetCollection<BsonDocument>("cities");
+            collection.InsertMany(cities);
+            connectionBlock.Text = "Connected";
+        }
+
+        private void InitButton_Click(object sender, RoutedEventArgs e)
+        {
+            InitDB();
         }
 
         private void InsertButton_Click(object sender, RoutedEventArgs e)
@@ -165,6 +214,7 @@ namespace NGD_Project_App
             InsertTextBox.Text = " { " + "\"" + "field" + "\"" + " : " + "\"" + "value" + "\"" + " } ";
             AggregateTextBox.Text = " { $match: { country: \"South Korea" + "\" }} ";
             DeleteTextBox.Text = " { " + "\"" + "field" + "\"" + " : " + "\"" + "value" + "\"" + " } ";
+            InitDB();
         }
 
     }

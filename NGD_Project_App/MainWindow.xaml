@@ -24,11 +24,15 @@
         <Border Grid.Column ="1" Background="#1f3d7a"/>
         <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#152951"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" x:Name="connectionBlock" Visibility="Collapsed" HorizontalAlignment="Left"></TextBlock>
-        <Button Grid.Row="1" Grid.Column="1" x:Name="ResetButton" Click="ResetButton_Click" HorizontalAlignment="Right">Reset</Button>
+        <TextBlock Grid.Row="1" Grid.Column="0" x:Name="connectionBlock" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+        <Button Grid.Row="1" Grid.Column="1" x:Name="ResetButton" Click="ResetButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center">Reset</Button>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
 
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="InitButton" Click="InitButton_Click">InitDB</Button>
+            </StackPanel>
+            
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button x:Name="InsertButton" Click="InsertButton_Click">Insert</Button>
                 <TextBox x:Name="InsertTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
