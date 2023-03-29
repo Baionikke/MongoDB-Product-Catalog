@@ -61,12 +61,12 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button x:Name="ShardedUpdateButton" Click="ShardedUpdateButton_Click">Sharded Update</Button>
-                <TextBox x:Name="ShardedUpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <TextBox x:Name="ShardedUpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;value&quot; : &quot;1000&quot; } "></TextBox>
             </StackPanel>
 
         </StackPanel>
 
-        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="ResultTextBlock" TextWrapping="Wrap" Width="140" Visibility="Collapsed" VerticalAlignment="Center"></TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="ResultTextBlock" TextWrapping="Wrap" Width="300" Visibility="Collapsed" VerticalAlignment="Center"></TextBlock>
 
     </Grid>
 

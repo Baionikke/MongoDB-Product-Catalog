@@ -1,2 +1,2 @@
-sh.addShard( "shard_a/localhost:27021,localhost:27022,localhost:27023")
-sh.addShard( "shard_b/localhost:27024,localhost:27025,localhost:27026")
+sh.addShard( "shard_a/127.0.0.1:27021,127.0.0.1:27022,127.0.0.1:27023")
+sh.addShard( "shard_b/127.0.0.1:27024,127.0.0.1:27025,127.0.0.1:27026")

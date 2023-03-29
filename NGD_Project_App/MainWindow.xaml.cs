@@ -29,7 +29,6 @@ using Windows.Media.Effects;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using MongoDB.Driver.Core.Configuration;
-using static System.Net.WebRequestMethods;
 using System.Threading.Tasks;
 
 namespace NGD_Project_App
@@ -37,7 +36,7 @@ namespace NGD_Project_App
     public sealed partial class MainWindow : Window
     {
         //public string connectionString = "mongodb://MSI-GS75Stealth:27017,MSI-GS75Stealth:27018,MSI-GS75Stealth:27019?replicaSet=rs";
-        public string connectionString = "mongodb://localhost:27030";
+        public string connectionString = "mongodb://127.0.0.1:27030";
 
 
         public MainWindow()
@@ -55,15 +54,17 @@ namespace NGD_Project_App
             {
                 var client = new MongoClient(connectionString);
             }
-            catch (Exception ex) { 
-                connectionBlock.Text = ex.Message.ToString();  
-                return false; }
+            catch (Exception ex)
+            {
+                connectionBlock.Text = ex.Message.ToString();
+                return false;
+            }
             return true;
         }
 
         private MongoClient GetConnectionClient()
         {
-            if (StartConnection() )
+            if (StartConnection())
             {
                 var client = new MongoClient(connectionString);
                 return client;
@@ -112,9 +113,9 @@ namespace NGD_Project_App
             {
                 session.StartTransaction();
                 IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll"); // QUESTA RIGA DI CODICE SI POTREBBE INSERIRE
-                                                                                                                                             // DENTRO LA FUNZIONE GETCONNECTION() SE SI 
-                                                                                                                                             // CONSIDERA SOLO IL DB DELLE CITTA' PER FARE
-                                                                                                                                             // LE TRANSAZIONI
+                                                                                                                                                   // DENTRO LA FUNZIONE GETCONNECTION() SE SI 
+                                                                                                                                                   // CONSIDERA SOLO IL DB DELLE CITTA' PER FARE
+                                                                                                                                                   // LE TRANSAZIONI
                 BsonDocument bsonDoc = BsonDocument.Parse(InsertTextBox.Text);
                 try
                 {
@@ -134,7 +135,7 @@ namespace NGD_Project_App
         private void FindButton_Click(object sender, RoutedEventArgs e)
         {
             ResultTextBlock.Text = "";
-            ResultTextBlock.Visibility= Visibility.Visible;
+            ResultTextBlock.Visibility = Visibility.Visible;
             var client = GetConnectionClient();
             IMongoDatabase database = client.GetDatabase("NGD_Project");
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("sharded_coll");
@@ -193,7 +194,7 @@ namespace NGD_Project_App
                 catch (MongoWriteException ex)
                 {
                     System.Diagnostics.Debug.WriteLine(ex.Message);
-                    ResultTextBlock.Text = "NOT Deleted, error: "+ex.Message.ToString();
+                    ResultTextBlock.Text = "NOT Deleted, error: " + ex.Message.ToString();
                     session.AbortTransaction();
                 }
             }
@@ -212,17 +213,17 @@ namespace NGD_Project_App
             InitDB();
         }
 
-        private void ReplicaUpdateButton_Click(object sender, RoutedEventArgs e)
+        private async void ReplicaUpdateButton_Click(object sender, RoutedEventArgs e)
         {
             ResultTextBlock.Text = "";
             ResultTextBlock.Visibility = Visibility.Visible;
 
-            using (var session = GetConnectionClient().StartSession()) 
+            using (var session = GetConnectionClient().StartSession())
             {
                 session.StartTransaction();
                 IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
 
-                var new_connection_string = "mongodb://localhost:27025";
+                string new_connection_string = "mongodb://127.0.0.1:27025";
                 var client_sharded = new MongoClient(new_connection_string);
                 IMongoDatabase database_sharded = client_sharded.GetDatabase("NGD_Project");
                 IMongoCollection<BsonDocument> collection_sharded = database_sharded.GetCollection<BsonDocument>("sharded_coll");
@@ -238,8 +239,8 @@ namespace NGD_Project_App
 
                     try
                     {
-                        collection.UpdateManyAsync(filter, update);
-                        ResultTextBlock.Text = "Updated";
+                        await collection.UpdateManyAsync(filter, update);
+                        connectionBlock.Text = "Updated";
 
                         var checks = 0;
 
@@ -247,7 +248,7 @@ namespace NGD_Project_App
                         bool checked_replica_copy = false;
                         try
                         {
-                            while (!checked_replica_copy && checks < 10000)
+                            while (!checked_replica_copy && checks < 1000)
                             {
                                 var resDocument = collection_sharded.Find(filter).FirstOrDefault();
                                 if (resDocument != null)
@@ -271,7 +272,7 @@ namespace NGD_Project_App
                                 }
                             }
 
-                            if (checks >= 10000)
+                            if (checks >= 1000)
                             {
                                 ResultTextBlock.Text = "More than 1000 inconsistency checks. Are you on the correct shard? (Actually on " + new_connection_string + ").";
                             }
@@ -279,7 +280,8 @@ namespace NGD_Project_App
                         }
                         catch (Exception ex)
                         {
-                            connectionBlock.Text = ex.Message.ToString();
+                            System.Diagnostics.Debug.WriteLine(ex.Message.ToString());
+                            ResultTextBlock.Text = ex.Message.ToString();
                         }
 
                     }
@@ -299,7 +301,7 @@ namespace NGD_Project_App
 
         }
 
-        private void ShardedUpdateButton_Click(object sender, RoutedEventArgs e)
+        private async void ShardedUpdateButton_Click(object sender, RoutedEventArgs e)
         {
             ResultTextBlock.Text = "";
             ResultTextBlock.Visibility = Visibility.Visible;
@@ -308,8 +310,8 @@ namespace NGD_Project_App
             {
                 IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
 
-                var shardA_connection_string = "mongodb://localhost:27022";
-                var shardB_connection_string = "mongodb://localhost:27025";
+                string shardA_connection_string = "mongodb://127.0.0.1:27021";
+                string shardB_connection_string = "mongodb://127.0.0.1:27024";
                 var client_shardA = new MongoClient(shardA_connection_string);
                 var client_shardB = new MongoClient(shardB_connection_string);
                 IMongoDatabase database_shardA = client_shardA.GetDatabase("NGD_Project");
@@ -328,14 +330,15 @@ namespace NGD_Project_App
                 if (resFilterX != null && resFilterY != null)
                 {
                     DateTime now = DateTime.Now;
-                    ShardedUpdateAsync(collection, new_key, new_value);
-                    
+                    session.StartTransaction();
+                    await ShardedUpdateAsync(collection, new_key, new_value);
+
                     var checks = 0;
                     while (checks < 1000)
                     {
                         var x = collection_shardB.Find(filterX).FirstOrDefault();
                         var y = collection_shardA.Find(filterY).FirstOrDefault();
-                        
+
                         if (x["value"] == y["value"])
                         {
                             DateTime new_now = x["lastModified"].ToLocalTime();
@@ -368,10 +371,11 @@ namespace NGD_Project_App
 
         }
 
-        private async void ShardedUpdateAsync(IMongoCollection<BsonDocument> collection, string new_key, string new_value)
+        private async Task ShardedUpdateAsync(IMongoCollection<BsonDocument> collection, string new_key, string new_value)
         {
+
             await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("name", "y"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
-            await Task.Delay(500);
+            await Task.Delay(1000);
             await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("name", "x"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
         }
     }

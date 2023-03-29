@@ -66,7 +66,7 @@
 
         </StackPanel>
 
-        <TextBlock x:ConnectionId='4' Grid.Row="0" Grid.Column="1" x:Name="ResultTextBlock" TextWrapping="Wrap" Width="140" Visibility="Collapsed" VerticalAlignment="Center"></TextBlock>
+        <TextBlock x:ConnectionId='4' Grid.Row="0" Grid.Column="1" x:Name="ResultTextBlock" TextWrapping="Wrap" Width="300" Visibility="Collapsed" VerticalAlignment="Center"></TextBlock>
 
     </Grid>
 
