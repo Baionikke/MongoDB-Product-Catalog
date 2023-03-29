@@ -53,6 +53,17 @@
                 <TextBox x:Name="DeleteTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
             </StackPanel>
 
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="ReplicaUpdateButton" Click="ReplicaUpdateButton_Click">Replica Update</Button>
+                <TextBox x:Name="ToUpdateTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <TextBox x:Name="UpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="ShardedUpdateButton" Click="ShardedUpdateButton_Click">Sharded Update</Button>
+                <TextBox x:Name="ShardedUpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+            </StackPanel>
+
         </StackPanel>
 
         <TextBlock Grid.Row="0" Grid.Column="1" x:Name="ResultTextBlock" TextWrapping="Wrap" Width="140" Visibility="Collapsed" VerticalAlignment="Center"></TextBlock>

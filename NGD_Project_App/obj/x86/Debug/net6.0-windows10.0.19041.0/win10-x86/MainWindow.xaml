@@ -30,27 +30,38 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:ConnectionId='13' x:Name="InitButton"                         >InitDB</Button>
+                <Button x:ConnectionId='18' x:Name="InitButton"                         >InitDB</Button>
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:ConnectionId='11' x:Name="InsertButton"                           >Insert</Button>
-                <TextBox x:ConnectionId='12' x:Name="InsertTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <Button x:ConnectionId='16' x:Name="InsertButton"                           >Insert</Button>
+                <TextBox x:ConnectionId='17' x:Name="InsertTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:ConnectionId='9' x:Name="FindButton"                         >Find</Button>
-                <TextBox x:ConnectionId='10' x:Name="FindTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <Button x:ConnectionId='14' x:Name="FindButton"                         >Find</Button>
+                <TextBox x:ConnectionId='15' x:Name="FindTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:ConnectionId='7' x:Name="AggregateButton"                              >Aggregate</Button>
-                <TextBox x:ConnectionId='8' x:Name="AggregateTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { $match: { country: &quot;South Korea&quot; }} "></TextBox>
+                <Button x:ConnectionId='12' x:Name="AggregateButton"                              >Aggregate</Button>
+                <TextBox x:ConnectionId='13' x:Name="AggregateTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { $match: { country: &quot;South Korea&quot; }} "></TextBox>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:ConnectionId='5' x:Name="DeleteButton"                           >Delete</Button>
-                <TextBox x:ConnectionId='6' x:Name="DeleteTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <Button x:ConnectionId='10' x:Name="DeleteButton"                           >Delete</Button>
+                <TextBox x:ConnectionId='11' x:Name="DeleteTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:ConnectionId='7' x:Name="ReplicaUpdateButton"                                  >Replica Update</Button>
+                <TextBox x:ConnectionId='8' x:Name="ToUpdateTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <TextBox x:ConnectionId='9' x:Name="UpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:ConnectionId='5' x:Name="ShardedUpdateButton"                                  >Sharded Update</Button>
+                <TextBox x:ConnectionId='6' x:Name="ShardedUpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
             </StackPanel>
 
         </StackPanel>

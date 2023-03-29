@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "CPX8lJXVgDIa81p+BkppKZ5Q/fLYKNzGI1vOaSMlnSfK0SJRK8touOEl5TNuKvi1OxQzdSkYrq4FoePbEVGN/A==",
+  "dgSpecHash": "seVGtFDBJK4ubByCQCLvi8xRn21TWUUrPeUMg7Cot8fNU4nYGzcNXMbxuX6igS+bqEZRzsqR+G5KeJUh3p8kww==",
   "success": true,
   "projectFilePath": "C:\\Users\\lunda\\Desktop\\MongoDB-Product-Catalog\\NGD_Project_App\\NGD_Project_App.csproj",
   "expectedPackageFiles": [
@@ -21,16 +21,16 @@
     "C:\\Users\\lunda\\.nuget\\packages\\system.security.accesscontrol\\5.0.0\\system.security.accesscontrol.5.0.0.nupkg.sha512",
     "C:\\Users\\lunda\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512",
     "C:\\Users\\lunda\\.nuget\\packages\\zstdsharp.port\\0.6.2\\zstdsharp.port.0.6.2.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\6.0.13\\microsoft.netcore.app.runtime.win-x86.6.0.13.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\6.0.15\\microsoft.netcore.app.runtime.win-x86.6.0.15.nupkg.sha512",
     "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.28\\microsoft.windows.sdk.net.ref.10.0.19041.28.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\6.0.13\\microsoft.aspnetcore.app.runtime.win-x86.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-arm64\\6.0.13\\microsoft.netcore.app.runtime.win-arm64.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\6.0.13\\microsoft.aspnetcore.app.runtime.win-x64.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-arm64\\6.0.13\\microsoft.windowsdesktop.app.runtime.win-arm64.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\6.0.13\\microsoft.windowsdesktop.app.runtime.win-x64.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-arm64\\6.0.13\\microsoft.aspnetcore.app.runtime.win-arm64.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\6.0.13\\microsoft.netcore.app.runtime.win-x64.6.0.13.nupkg.sha512",
-    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\6.0.13\\microsoft.windowsdesktop.app.runtime.win-x86.6.0.13.nupkg.sha512"
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\6.0.15\\microsoft.aspnetcore.app.runtime.win-x86.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-arm64\\6.0.15\\microsoft.netcore.app.runtime.win-arm64.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\6.0.15\\microsoft.aspnetcore.app.runtime.win-x64.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-arm64\\6.0.15\\microsoft.windowsdesktop.app.runtime.win-arm64.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\6.0.15\\microsoft.windowsdesktop.app.runtime.win-x64.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-arm64\\6.0.15\\microsoft.aspnetcore.app.runtime.win-arm64.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\6.0.15\\microsoft.netcore.app.runtime.win-x64.6.0.15.nupkg.sha512",
+    "C:\\Users\\lunda\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\6.0.15\\microsoft.windowsdesktop.app.runtime.win-x86.6.0.15.nupkg.sha512"
   ],
   "logs": []
 }

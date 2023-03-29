@@ -29,13 +29,15 @@ using Windows.Media.Effects;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using MongoDB.Driver.Core.Configuration;
+using static System.Net.WebRequestMethods;
+using System.Threading.Tasks;
 
 namespace NGD_Project_App
 {
     public sealed partial class MainWindow : Window
     {
-        public string connectionString = "mongodb://MSI-GS75Stealth:27017,MSI-GS75Stealth:27018,MSI-GS75Stealth:27019?replicaSet=rs";
-        //public string connectionString = "mongodb://localhost:27017";
+        //public string connectionString = "mongodb://MSI-GS75Stealth:27017,MSI-GS75Stealth:27018,MSI-GS75Stealth:27019?replicaSet=rs";
+        public string connectionString = "mongodb://localhost:27030";
 
 
         public MainWindow()
@@ -73,36 +75,27 @@ namespace NGD_Project_App
         {
             var session = GetConnectionClient().StartSession();
 
-            var cities = new BsonDocument[]
+            var sharded_coll = new BsonDocument[]
             {
                 new BsonDocument()
                 {
-                    { "name", "Tokyo" },
-                    { "country", "Japan" },
-                    { "continent", "Asia" },
-                    { "population", 37400 },
+                    { "name", "x" },
+                    { "value", "0" },
+                    { "shard_value" , "0" }
                 },
                 new BsonDocument()
                 {
-                    { "name", "Delhi" },
-                    { "country", "India" },
-                    { "continent", "Asia" },
-                    { "population", 28.514 }
-                },
-                new BsonDocument()
-                {
-                    {"name", "Seoul" },
-                    {"country", "South Korea" },
-                    { "continent", "Asia" },
-                    { "population", 25.674 }
+                    { "name", "y" },
+                    { "value", "0" },
+                    { "shard_value" , "1" }
                 }
             };
 
             session.StartTransaction();
             var db = new MongoClient(connectionString).GetDatabase("NGD_Project");
-            db.DropCollection("cities");
-            IMongoCollection<BsonDocument> collection = db.GetCollection<BsonDocument>("cities");
-            collection.InsertMany(cities);
+            db.DropCollection("sharded_coll");
+            IMongoCollection<BsonDocument> collection = db.GetCollection<BsonDocument>("sharded_coll");
+            collection.InsertMany(sharded_coll);
             connectionBlock.Text = "Connected";
         }
 
@@ -118,7 +111,7 @@ namespace NGD_Project_App
             using (var session = GetConnectionClient().StartSession()) // letto un articolo dove facevano con l'async
             {
                 session.StartTransaction();
-                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("cities"); // QUESTA RIGA DI CODICE SI POTREBBE INSERIRE
+                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll"); // QUESTA RIGA DI CODICE SI POTREBBE INSERIRE
                                                                                                                                              // DENTRO LA FUNZIONE GETCONNECTION() SE SI 
                                                                                                                                              // CONSIDERA SOLO IL DB DELLE CITTA' PER FARE
                                                                                                                                              // LE TRANSAZIONI
@@ -144,7 +137,7 @@ namespace NGD_Project_App
             ResultTextBlock.Visibility= Visibility.Visible;
             var client = GetConnectionClient();
             IMongoDatabase database = client.GetDatabase("NGD_Project");
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("cities");
+            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("sharded_coll");
 
             var filter = Builders<BsonDocument>.Filter.Eq(FindTextBox.Text.Split("\"")[1], FindTextBox.Text.Split("\"")[3]);
             var resDocument = collection.Find(filter).FirstOrDefault(); // FirstOrDefault mostra solo il primo documento -> bisogna mostrare tutti i risultati
@@ -161,7 +154,7 @@ namespace NGD_Project_App
             ResultTextBlock.Visibility = Visibility.Visible;
             var client = GetConnectionClient();
             IMongoDatabase database = client.GetDatabase("NGD_Project");
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("cities");
+            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("sharded_coll");
 
             PipelineDefinition<BsonDocument, BsonDocument> pipeline = new BsonDocument[] { BsonDocument.Parse(AggregateTextBox.Text) };
             var resultAggr = collection.Aggregate(pipeline).FirstOrDefault();
@@ -180,7 +173,7 @@ namespace NGD_Project_App
             using (var session = GetConnectionClient().StartSession())
             {
                 session.StartTransaction();
-                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("cities");
+                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
 
                 BsonDocument bsonDoc = BsonDocument.Parse(DeleteTextBox.Text);
                 try
@@ -214,9 +207,173 @@ namespace NGD_Project_App
             InsertTextBox.Text = " { " + "\"" + "field" + "\"" + " : " + "\"" + "value" + "\"" + " } ";
             AggregateTextBox.Text = " { $match: { country: \"South Korea" + "\" }} ";
             DeleteTextBox.Text = " { " + "\"" + "field" + "\"" + " : " + "\"" + "value" + "\"" + " } ";
+            ToUpdateTextBox.Text = " { " + "\"" + "field" + "\"" + " : " + "\"" + "value" + "\"" + " } ";
+            UpdatedTextBox.Text = " { " + "\"" + "field" + "\"" + " : " + "\"" + "value" + "\"" + " } ";
             InitDB();
         }
 
+        private void ReplicaUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResultTextBlock.Text = "";
+            ResultTextBlock.Visibility = Visibility.Visible;
+
+            using (var session = GetConnectionClient().StartSession()) 
+            {
+                session.StartTransaction();
+                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
+
+                var new_connection_string = "mongodb://localhost:27025";
+                var client_sharded = new MongoClient(new_connection_string);
+                IMongoDatabase database_sharded = client_sharded.GetDatabase("NGD_Project");
+                IMongoCollection<BsonDocument> collection_sharded = database_sharded.GetCollection<BsonDocument>("sharded_coll");
+
+                var filter = Builders<BsonDocument>.Filter.Eq(ToUpdateTextBox.Text.Split("\"")[1], ToUpdateTextBox.Text.Split("\"")[3]);
+                var resFilter = collection.Find(filter).FirstOrDefault();
+
+                if (resFilter != null)
+                {
+                    var new_key = UpdatedTextBox.Text.Split("\"")[1];
+                    var new_value = UpdatedTextBox.Text.Split("\"")[3];
+                    var update = Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified");
+
+                    try
+                    {
+                        collection.UpdateManyAsync(filter, update);
+                        ResultTextBlock.Text = "Updated";
+
+                        var checks = 0;
+
+                        DateTime now = DateTime.Now;
+                        bool checked_replica_copy = false;
+                        try
+                        {
+                            while (!checked_replica_copy && checks < 10000)
+                            {
+                                var resDocument = collection_sharded.Find(filter).FirstOrDefault();
+                                if (resDocument != null)
+                                {
+                                    if (resDocument[new_key].Equals(new_value))
+                                    {
+                                        checked_replica_copy = true;
+                                        DateTime new_now = DateTime.Now;
+                                        now = resDocument["lastModified"].ToLocalTime();
+                                        ResultTextBlock.Text = resDocument.ToString() + "\nUpdated in " + (new_now.Millisecond + new_now.Second * 1000 - now.Millisecond - now.Second * 1000).ToString() + " milliseconds, with " + checks.ToString() + " inconsistency checks.";
+                                    }
+                                    else
+                                    {
+                                        checks++;
+                                    }
+                                }
+                                else
+                                {
+                                    ResultTextBlock.Text = "Document not found. Are you on the correct shard? (Actually on " + new_connection_string + ").";
+                                    break;
+                                }
+                            }
+
+                            if (checks >= 10000)
+                            {
+                                ResultTextBlock.Text = "More than 1000 inconsistency checks. Are you on the correct shard? (Actually on " + new_connection_string + ").";
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            connectionBlock.Text = ex.Message.ToString();
+                        }
+
+                    }
+                    catch (MongoWriteException ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex.Message);
+                        ResultTextBlock.Text = "NOT Updated, error:" + ex.Message.ToString();
+                        session.AbortTransaction();
+                    }
+                }
+                else
+                {
+                    ResultTextBlock.Text = "NO RESULT FOUND";
+                }
+
+            }
+
+        }
+
+        private void ShardedUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResultTextBlock.Text = "";
+            ResultTextBlock.Visibility = Visibility.Visible;
+
+            using (var session = GetConnectionClient().StartSession())
+            {
+                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
+
+                var shardA_connection_string = "mongodb://localhost:27022";
+                var shardB_connection_string = "mongodb://localhost:27025";
+                var client_shardA = new MongoClient(shardA_connection_string);
+                var client_shardB = new MongoClient(shardB_connection_string);
+                IMongoDatabase database_shardA = client_shardA.GetDatabase("NGD_Project");
+                IMongoDatabase database_shardB = client_shardB.GetDatabase("NGD_Project");
+                IMongoCollection<BsonDocument> collection_shardA = database_shardA.GetCollection<BsonDocument>("sharded_coll"); // Same collection, different chunks
+                IMongoCollection<BsonDocument> collection_shardB = database_shardB.GetCollection<BsonDocument>("sharded_coll");
+
+                var filterX = Builders<BsonDocument>.Filter.Eq("name", "x");
+                var filterY = Builders<BsonDocument>.Filter.Eq("name", "y");
+                var resFilterX = collection.Find(filterX).FirstOrDefault();
+                var resFilterY = collection.Find(filterY).FirstOrDefault();
+
+                var new_key = ShardedUpdatedTextBox.Text.Split("\"")[1];
+                var new_value = ShardedUpdatedTextBox.Text.Split("\"")[3];
+
+                if (resFilterX != null && resFilterY != null)
+                {
+                    DateTime now = DateTime.Now;
+                    ShardedUpdateAsync(collection, new_key, new_value);
+                    
+                    var checks = 0;
+                    while (checks < 1000)
+                    {
+                        var x = collection_shardB.Find(filterX).FirstOrDefault();
+                        var y = collection_shardA.Find(filterY).FirstOrDefault();
+                        
+                        if (x["value"] == y["value"])
+                        {
+                            DateTime new_now = x["lastModified"].ToLocalTime();
+                            ResultTextBlock.Text = "Updated in " + (new_now.Millisecond + new_now.Second * 1000 - now.Millisecond - now.Second * 1000).ToString() + " milliseconds, with " + checks.ToString() + " inconsistency checks.";
+                            break;
+                        }
+                        else
+                        {
+                            checks++;
+                        }
+                    }
+                }
+                else
+                {
+                    if (resFilterX == null && resFilterY != null)
+                    {
+                        ResultTextBlock.Text = "x NOT FOUND";
+                    }
+                    if (resFilterY == null && resFilterX != null)
+                    {
+                        ResultTextBlock.Text = "y NOT FOUND";
+                    }
+                    else
+                    {
+                        ResultTextBlock.Text = "x AND y NOT FOUND";
+                    }
+                }
+
+            }
+
+        }
+
+        private async void ShardedUpdateAsync(IMongoCollection<BsonDocument> collection, string new_key, string new_value)
+        {
+            await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("name", "y"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
+            await Task.Delay(500);
+            await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("name", "x"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
+        }
     }
 
 }
