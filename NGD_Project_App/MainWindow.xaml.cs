@@ -2,33 +2,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using MongoDB.Driver;
-using Windows.UI.Text;
 using MongoDB.Bson;
-using System.Reflection.Metadata;
-using SharpCompress.Common;
-using Windows.System;
-using Microsoft.VisualBasic;
-using Windows.Media.Protection.PlayReady;
-using System.Xml.Linq;
-using Microsoft.UI.Xaml.Documents;
-using Windows.Media.Effects;
-using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
-using MongoDB.Driver.Core.Configuration;
 using System.Threading.Tasks;
 
 namespace NGD_Project_App
@@ -223,7 +200,7 @@ namespace NGD_Project_App
                 session.StartTransaction();
                 IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
 
-                string new_connection_string = "mongodb://127.0.0.1:27025";
+                string new_connection_string = "mongodb://127.0.0.1:27024"; //TODO: fix a 27025
                 var client_sharded = new MongoClient(new_connection_string);
                 IMongoDatabase database_sharded = client_sharded.GetDatabase("NGD_Project");
                 IMongoCollection<BsonDocument> collection_sharded = database_sharded.GetCollection<BsonDocument>("sharded_coll");
@@ -331,15 +308,16 @@ namespace NGD_Project_App
                 {
                     DateTime now = DateTime.Now;
                     session.StartTransaction();
-                    await ShardedUpdateAsync(collection, new_key, new_value);
+                    ShardedUpdateAsync(collection, new_key, new_value);
 
                     var checks = 0;
-                    while (checks < 1000)
+                    int num_checks = 10; //Number of consistency checks scheduled
+                    while (checks < num_checks)
                     {
-                        var x = collection_shardB.Find(filterX).FirstOrDefault();
-                        var y = collection_shardA.Find(filterY).FirstOrDefault();
+                        var x = collection_shardB.Find(filterX).First();
+                        var y = collection_shardA.Find(filterY).First();
 
-                        if (x["value"] == y["value"])
+                        if (y["value"] == x["value"])
                         {
                             DateTime new_now = x["lastModified"].ToLocalTime();
                             ResultTextBlock.Text = "Updated in " + (new_now.Millisecond + new_now.Second * 1000 - now.Millisecond - now.Second * 1000).ToString() + " milliseconds, with " + checks.ToString() + " inconsistency checks.";
@@ -348,7 +326,12 @@ namespace NGD_Project_App
                         else
                         {
                             checks++;
+                            await Task.Delay(100);
                         }
+                    }
+                    if (checks >= num_checks)
+                    {
+                        ResultTextBlock.Text = "Check resulted in more than " + checks.ToString() + " consistency checks failed.";
                     }
                 }
                 else
@@ -374,9 +357,9 @@ namespace NGD_Project_App
         private async Task ShardedUpdateAsync(IMongoCollection<BsonDocument> collection, string new_key, string new_value)
         {
 
-            await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("name", "y"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
+            collection.UpdateMany(Builders<BsonDocument>.Filter.Eq("name", "y"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
             await Task.Delay(1000);
-            await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("name", "x"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
+            collection.UpdateMany(Builders<BsonDocument>.Filter.Eq("name", "x"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
         }
     }
 

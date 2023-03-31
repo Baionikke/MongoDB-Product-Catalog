@@ -61,7 +61,7 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button x:ConnectionId='5' x:Name="ShardedUpdateButton"                                  >Sharded Update</Button>
-                <TextBox x:ConnectionId='6' x:Name="ShardedUpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;field&quot; : &quot;value&quot; } "></TextBox>
+                <TextBox x:ConnectionId='6' x:Name="ShardedUpdatedTextBox" TextWrapping="Wrap" Width="140" Visibility="Visible" Text=" { &quot;value&quot; : &quot;1000&quot; } "></TextBox>
             </StackPanel>
 
         </StackPanel>
