@@ -1,0 +1,1 @@
+C:\Users\lunda\Desktop\MongoDB-Product-Catalog\NGD_Project_App\bin\x86\Debug\net6.0-windows10.0.19041.0\win10-x86\AppPackages\NGD_Project_App_1.0.0.0_x86_Debug_Test\NGD_Project_App_1.0.0.0_x86_Debug.msix

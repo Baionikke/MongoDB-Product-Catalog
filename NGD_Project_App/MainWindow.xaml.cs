@@ -7,6 +7,7 @@ using System.Linq;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace NGD_Project_App
 {
@@ -159,7 +160,7 @@ namespace NGD_Project_App
                     var resDocument = collection.Find(bsonDoc).FirstOrDefault();
                     if (resDocument != null)
                     {
-                        collection.DeleteOne(bsonDoc);
+                        collection.DeleteMany(bsonDoc);
                         session.CommitTransaction();
                         ResultTextBlock.Text = "Deleted";
                     }
@@ -194,13 +195,15 @@ namespace NGD_Project_App
         {
             ResultTextBlock.Text = "";
             ResultTextBlock.Visibility = Visibility.Visible;
+            connectionBlock.Text = "Updating...";
+
 
             using (var session = GetConnectionClient().StartSession())
             {
                 session.StartTransaction();
                 IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
 
-                string new_connection_string = "mongodb://127.0.0.1:27024"; //TODO: fix a 27025
+                string new_connection_string = "mongodb://127.0.0.1:27025"; //TODO: fix a 27025
                 var client_sharded = new MongoClient(new_connection_string);
                 IMongoDatabase database_sharded = client_sharded.GetDatabase("NGD_Project");
                 IMongoCollection<BsonDocument> collection_sharded = database_sharded.GetCollection<BsonDocument>("sharded_coll");
@@ -282,13 +285,14 @@ namespace NGD_Project_App
         {
             ResultTextBlock.Text = "";
             ResultTextBlock.Visibility = Visibility.Visible;
+            connectionBlock.Text = "Updating...";
 
             using (var session = GetConnectionClient().StartSession())
             {
                 IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
 
-                string shardA_connection_string = "mongodb://127.0.0.1:27021";
-                string shardB_connection_string = "mongodb://127.0.0.1:27024";
+                string shardA_connection_string = "mongodb://127.0.0.1:27023";
+                string shardB_connection_string = "mongodb://127.0.0.1:27025";
                 var client_shardA = new MongoClient(shardA_connection_string);
                 var client_shardB = new MongoClient(shardB_connection_string);
                 IMongoDatabase database_shardA = client_shardA.GetDatabase("NGD_Project");
@@ -311,7 +315,7 @@ namespace NGD_Project_App
                     ShardedUpdateAsync(collection, new_key, new_value);
 
                     var checks = 0;
-                    int num_checks = 10; //Number of consistency checks scheduled
+                    int num_checks = 100; //Number of consistency checks scheduled
                     while (checks < num_checks)
                     {
                         var x = collection_shardB.Find(filterX).First();
@@ -360,7 +364,71 @@ namespace NGD_Project_App
             collection.UpdateMany(Builders<BsonDocument>.Filter.Eq("name", "y"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
             await Task.Delay(1000);
             collection.UpdateMany(Builders<BsonDocument>.Filter.Eq("name", "x"), Builders<BsonDocument>.Update.Set(new_key, new_value).CurrentDate("lastModified"));
+            connectionBlock.Text = "Updated";
         }
-    }
 
+        private async void PhantomUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResultTextBlock.Text = "";
+            ResultTextBlock.Visibility = Visibility.Visible;
+            connectionBlock.Text = "Updating...";
+
+            using (var session = GetConnectionClient().StartSession())
+            {
+                session.StartTransaction();
+                IMongoCollection<BsonDocument> collection = session.Client.GetDatabase("NGD_Project").GetCollection<BsonDocument>("sharded_coll");
+                collection.UpdateMany(Builders<BsonDocument>.Filter.Eq("field", "0"), Builders<BsonDocument>.Update.Set("value", 0).CurrentDate("lastModified"));
+
+                string new_value = PhantomUpdatedTextBox.Text.Split("\"")[1];
+
+                var task1 = FirstTransaction(collection);
+                DateTime second_start = DateTime.Now;
+                var task2 = SecondTransaction(collection, new_value);
+
+                await Task.WhenAll(task1, task2);
+
+                if (task1.Result.date.CompareTo(second_start) >= 0 || task1.Result.date.CompareTo(task2.Result) >= 0) //Fine prima transazione successiva a inizio seconda OPPURE fine prima successiva a fine seconda => CONCORRENTI
+                {
+                    List<BsonDocument> documentList = new List<BsonDocument>();
+                    foreach (var document in task1.Result.resFilter)
+                    {
+                        documentList.Add(document);
+                    }
+                    if (documentList[0]["value"] == documentList[1]["value"])
+                    {
+                        ResultTextBlock.Text = documentList[0].ToString() + "\n" + documentList[1].ToString() + "\n\n" + "Constraint respected eventhough there was concurrency in transactions!";
+                        connectionBlock.Text = "Updated";
+                    }
+                    else
+                    {
+                        ResultTextBlock.Text = documentList[0].ToString() + "\n" + documentList[1].ToString() + "\n\n" + "Constraint NOT respected, Phantom Update!";
+                        connectionBlock.Text = "Updated";
+                    }
+
+                }
+                else
+                {
+                    ResultTextBlock.Text = "Concurrency not registered, both values are set to: " + new_value.ToString();
+                    connectionBlock.Text = "Updated";
+                }
+
+            }
+
+        }
+
+        private async Task<(DateTime date, System.Collections.Generic.List<BsonDocument> resFilter)> FirstTransaction(IMongoCollection<BsonDocument> collection)
+        {
+            var resFilter = await collection.Find(Builders<BsonDocument>.Filter.Eq("field", "0")).ToListAsync();
+
+            return (DateTime.Now, resFilter);
+        }
+
+        private async Task<DateTime> SecondTransaction(IMongoCollection<BsonDocument> collection, string new_value)
+        {
+            await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("field", "0"), Builders<BsonDocument>.Update.Set("value", new_value).CurrentDate("lastModified")); // parte ma non si attende il termine
+            
+            return DateTime.Now;
+        }
+
+    }
 }
