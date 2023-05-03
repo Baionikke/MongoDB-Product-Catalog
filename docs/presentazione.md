@@ -61,7 +61,8 @@ Documento **X** --> Shard B
     "name": "x",
     "value": "10",
     "shard_value": "0",
-    "lastModified": "ISODate("aaaa-mm-ggT:...")"
+    "lastModified": "ISODate("aaaa-mm-ggT:...")",
+    "field": "0"
 }
 ```
 
@@ -169,9 +170,9 @@ MongoDB $\geq$ <span style="color:green">4.2</span> supporta Multi-Document tran
 
 #### Sharded Update
 - **Transazione asincrona a MongoS:**
-   1. Aggiornamento del "value" nel documento Y
+   1. Transazione di aggiornamento del "value" nel documento Y
    2. Attesa di 1sec
-   3. Aggiornamento del "value" nel documento X
+   3. Transazione di aggiornamento del "value" nel documento X
 
 - **Check contemporaneo di vincolo di integrità**
 <span style="color:darkgrey">"value@X"=="value@Y" </span>
@@ -197,10 +198,45 @@ MongoDB $\geq$ <span style="color:green">4.2</span> supporta Multi-Document tran
 ---
 #### Sharded Update
 
-**Transazione multi-shard <span style="color:red">NON</span> è atomica**
+**La singola sessione  <span style="color:red">NON</span> è atomica**
 
-Le transazioni che coinvolgono più di uno shard non sono atomiche
+Le transazioni che coinvolgono più di uno shard all'interno della stessa sessione non sono atomiche
 
+---
+
+#### Phantom Update
+1. Transazione di **ricerca** che coinvolga **tutti** i documenti del cluster (a MongoS)
+   - Verifica che il campo value dei documenti trovati sia costante 
+2. Contemporanea transazione di **update** su **tutti** i documenti del cluster (a MongoS)
+
+---
+
+#### Phantom Update
+- Con l'utilizzo di timestamp verifichiamo che ci sia concorrenza tra le due transazioni
+- Verificata la concorrenza effettuiamo un check sul **vincolo di integrità**: campo value uguale tra tutti i documenti
+
+---
+
+#### <span style="color:white">Phantom Update
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+![bg fit](src/PhantomUpdate.png)
+
+---
+
+#### Phantom Update
+Quando c'è concorrenza non c'è mai anomalia di Aggiornamento Fantasma
+
+---
+### Conclusioni
+- Transazioni definiscono lock condivisi ed esclusivi su tutti i server del cluster coinvolti in transazioni multi-documento
+- Lock garantiscono **atomicità** e **gestione concorrenza**
 ---
 
 # Grazie per l'attenzione
@@ -211,6 +247,7 @@ Le transazioni che coinvolgono più di uno shard non sono atomiche
 1. Bug multi-istanza nello stesso host
 2. Codice Replica Update
 3. Codice Sharded Update
+4. Codice Phantom Update
 
 ---
 
@@ -327,4 +364,56 @@ private async Task ShardedUpdateAsync(IMongoCollection<BsonDocument> collection,
                                                     .CurrentDate("lastModified"));
         connectionBlock.Text = "Updated";
     }
+```
+---
+
+#### Phantom Update - ext
+```csharp
+private async void PhantomUpdateButton_Click(object sender, RoutedEventArgs e)
+{
+    ...
+    using (var session = GetConnectionClient().StartSession())
+    {
+        ...
+        collection.UpdateMany(Builders<BsonDocument>.Filter.Eq("field", "0"), Builders<BsonDocument>.Update.Set("value", 0).CurrentDate("lastModified"));
+        // Set tutti value a 0
+        var task1 = FirstTransaction(collection);
+        DateTime second_start = DateTime.Now;
+        var task2 = SecondTransaction(collection, new_value);
+        await Task.WhenAll(task1, task2);
+        if (task1.Result.date.CompareTo(second_start) >= 0 || task1.Result.date.CompareTo(task2.Result) >= 0) 
+        //Fine prima transazione successiva a inizio seconda OPPURE fine prima successiva a fine seconda => CONCORRENTI
+        {
+            List<BsonDocument> documentList = new List<BsonDocument>();
+            foreach (var document in task1.Result.resFilter)
+            { documentList.Add(document); }
+            if (documentList[0]["value"] == documentList[1]["value"])
+            { ResultTextBlock.Text = documentList[0].ToString() + "\n" + documentList[1].ToString() + "Constraint respected eventhough there was concurrency in transactions!"; }
+            else
+            { ResultTextBlock.Text = documentList[0].ToString() + "\n" + documentList[1].ToString() + "Constraint NOT respected, Phantom Update!"; }
+        }
+        else
+        { ResultTextBlock.Text = "Concurrency not registered, both values are set to: " + new_value.ToString();
+            connectionBlock.Text = "Updated"; }
+    }
+}
+```
+---
+
+#### Phantom Update - transactions
+```csharp
+private async Task<(DateTime date, System.Collections.Generic.List<BsonDocument> resFilter)> FirstTransaction(IMongoCollection<BsonDocument> collection)
+{
+    var resFilter = await collection.Find(Builders<BsonDocument>.Filter.Eq("field", "0")).ToListAsync();
+
+    return (DateTime.Now, resFilter);
+}
+
+private async Task<DateTime> SecondTransaction(IMongoCollection<BsonDocument> collection, string new_value)
+{
+    await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Eq("field", "0"), Builders<BsonDocument>.Update.Set("value", new_value).CurrentDate("lastModified")); 
+    // parte ma non si attende il termine
+    
+    return DateTime.Now;
+}
 ```
